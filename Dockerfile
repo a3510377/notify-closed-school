@@ -10,4 +10,6 @@ FROM alpine
 WORKDIR /app
 COPY --from=builder /app/start .
 
+VOLUME [ "/app/data" ]
+
 CMD /app/start
