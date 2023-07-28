@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -22,7 +23,10 @@ const (
 	LineMessageAPIUrl    = "https://notify-api.line.me/api/notify"
 )
 
-var noClose = []string{"尚未列入警戒區。", "今天照常上班、照常上課。"}
+var (
+	noClose   = []string{"尚未列入警戒區。", "今天照常上班、照常上課。"}
+	timeMatch = regexp.MustCompile(`\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}`)
+)
 
 // const WorkSchoolCloseURL = "https://alerts.ncdr.nat.gov.tw/RssAtomFeed.ashx?AlertType=33"
 // 由於政府資料開放平臺的資料更新時間不穩定，因此使用 https://www.dgpa.gov.tw/
@@ -42,9 +46,9 @@ func GetClosedSchool() (*WorkSchoolClose, error) {
 
 	c.OnHTML("#Content>.Content_Updata>h4", func(e *colly.HTMLElement) {
 		// "更新時間：2023/07/28 11:55:03"
-		fmt.Println(strings.TrimSpace(e.Text))
-		if date, err := time.Parse("2006/01/02 15:04:05", strings.TrimSpace(e.Text)[15:]); err == nil {
-			fmt.Println(date)
+		match := timeMatch.FindStringSubmatch(strings.TrimSpace(e.Text))[0]
+		location, _ := time.LoadLocation("Asia/Taipei")
+		if date, err := time.ParseInLocation("2006/01/02 15:04:05", match, location); err == nil {
 			result.Date = &date
 		}
 	})
