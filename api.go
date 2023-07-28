@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	WorkSchoolCloseURL   = "https://www.dgpa.gov.tw"
+	WorkSchoolCloseURL   = "https://www.dgpa.gov.tw/typh/daily/nds.html"
 	UA                   = "notifyNotifyClosedSchool (https://github.com/a3510377, 1.0.0) Golang/1.20"
 	DiscordMessageAPIUrl = "https://discord.com/api/channels/%d/messages"
 	LineMessageAPIUrl    = "https://notify-api.line.me/api/notify"
