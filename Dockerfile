@@ -9,6 +9,7 @@ RUN go build -v -a -ldflags '-s -w' -gcflags="all=-trimpath=${PWD}" -asmflags="a
 FROM alpine
 WORKDIR /app
 COPY --from=builder /app/start .
+RUN apk add tzdata
 
 VOLUME [ "/app/data" ]
 
