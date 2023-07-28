@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - master
     tags:
       - 'v*'
     paths-ignore:
@@ -15,9 +15,6 @@ on:
   #   - cron: 33 17 * * *
   release:
     types: [created]
-  pull_request:
-    branches:
-      - main
 
 env:
   # Use docker.io for Docker Hub if empty
