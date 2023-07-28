@@ -26,7 +26,7 @@ Discord 是一款專為社群設計的免費網路即時通話軟體與數位發
 
 #### `enable` 啟用 discord 提醒
 
-若要開啟 discord 提醒，可將值改成 `false` 若要開啟則改成 `true`
+若要關閉 discord 提醒，可將值改成 `false` 若要開啟則改成 `true`
 
 #### `TOKEN` 機器人權杖
 
@@ -74,7 +74,7 @@ webhook:
 
 #### `enable` 啟用 line notify 提醒
 
-若要開啟 line notify 提醒，可將值改成 `false` 若要開啟則改成 `true`
+若要關閉 line notify 提醒，可將值改成 `false` 若要開啟則改成 `true`
 
 #### `tokens` line notify 權杖
 
