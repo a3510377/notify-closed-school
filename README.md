@@ -13,7 +13,7 @@ go run .
 ### Docker
 
 ```bash
-docker run --name notify- -d \
+docker run --name notify-closed-school -d \
   --restart unless-stopped \
   -v /path/to/data:/app/data \
   ghcr.io/a3510377/notify-closed-school:latest
