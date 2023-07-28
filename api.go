@@ -33,6 +33,10 @@ var (
 
 type WorkSchoolClose struct {
 	Date *time.Time
+	Data []WorkSchoolCloseData
+}
+type WorkSchoolCloseMap struct {
+	Date *time.Time
 	Data map[string]WorkSchoolCloseData
 }
 type WorkSchoolCloseData struct {
@@ -40,9 +44,9 @@ type WorkSchoolCloseData struct {
 	State  string
 }
 
-func GetClosedSchool() (*WorkSchoolClose, error) {
+func GetClosedSchool() (*WorkSchoolCloseMap, error) {
 	c := colly.NewCollector()
-	result := WorkSchoolClose{Data: map[string]WorkSchoolCloseData{}}
+	result := WorkSchoolCloseMap{Data: map[string]WorkSchoolCloseData{}}
 
 	c.OnHTML("#Content>.Content_Updata>h4:first-child", func(e *colly.HTMLElement) {
 		// "更新時間：2023/07/28 11:55:03"
@@ -83,7 +87,7 @@ func GetClosedSchool() (*WorkSchoolClose, error) {
 }
 
 /* ----- notify ----- */
-func NotifyLine(values []WorkSchoolCloseData) {
+func NotifyLine(values WorkSchoolClose) {
 	TOKEN := ConfigData.Line.TOKEN
 
 	if TOKEN == "" {
@@ -92,7 +96,7 @@ func NotifyLine(values []WorkSchoolCloseData) {
 	}
 
 	text := "\n"
-	for _, v := range values {
+	for _, v := range values.Data {
 		text += fmt.Sprintf("%s: %s\n", v.County, strings.ReplaceAll(v.State, "\n", "\n  "))
 	}
 	data := url.Values{"message": {text}}.Encode()
@@ -119,12 +123,12 @@ func NotifyLine(values []WorkSchoolCloseData) {
 	}
 }
 
-func NotifyDiscord(values []WorkSchoolCloseData) {
+func NotifyDiscord(values WorkSchoolClose) {
 	discordConfig := ConfigData.Discord
 	TOKEN := discordConfig.TOKEN
 
 	fields := []map[string]any{}
-	for _, v := range values {
+	for _, v := range values.Data {
 		fields = append(fields, map[string]any{
 			"name":   v.County,
 			"value":  v.State,
@@ -138,7 +142,7 @@ func NotifyDiscord(values []WorkSchoolCloseData) {
 		"footer": map[string]any{
 			"text":      "資料來源: https://www.dgpa.gov.tw/",
 			"icon_url":  "https://avatars.githubusercontent.com/u/70706886?v=4",
-			"timestamp": time.Now().Format(time.RFC3339),
+			"timestamp": values.Date.Unix(),
 		},
 	}}})
 	bodyReader := bytes.NewReader(contentByte)

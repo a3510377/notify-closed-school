@@ -54,14 +54,14 @@ func checkAndNotification() error {
 	}
 
 	if len(notifications) > 0 {
-		notification(notifications)
+		notification(WorkSchoolClose{Date: data.Date, Data: notifications})
 	}
 
 	WriteTmpDate(tmpData)
 	return nil
 }
 
-func notification(notifications []WorkSchoolCloseData) {
+func notification(notifications WorkSchoolClose) {
 	if ConfigData.Discord.Enable {
 		NotifyDiscord(notifications)
 	}
