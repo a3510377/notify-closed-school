@@ -2,6 +2,23 @@
 
 這是一個可以讓你在停班停課時，透過 Line Notify/Discord Bot/Discord Webhook 通知您的服務。
 
+## 運行
+
+### 直接執行
+
+```bash
+go run .
+```
+
+### Docker
+
+```bash
+docker run --name notify- -d \
+  --restart unless-stopped \
+  -v /path/to/data:/app/data \
+  ghcr.io/a3510377/notify-closed-school:latest
+```
+
 ## 設定
 
 第一次啟動時將會生成 `data/config.yaml` 檔案:
