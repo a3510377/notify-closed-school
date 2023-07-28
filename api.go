@@ -44,7 +44,7 @@ func GetClosedSchool() (*WorkSchoolClose, error) {
 	c := colly.NewCollector()
 	result := WorkSchoolClose{Data: map[string]WorkSchoolCloseData{}}
 
-	c.OnHTML("#Content>.Content_Updata>h4", func(e *colly.HTMLElement) {
+	c.OnHTML("#Content>.Content_Updata>h4:first-child", func(e *colly.HTMLElement) {
 		// "更新時間：2023/07/28 11:55:03"
 		match := timeMatch.FindStringSubmatch(strings.TrimSpace(e.Text))[0]
 		location, _ := time.LoadLocation("Asia/Taipei")
