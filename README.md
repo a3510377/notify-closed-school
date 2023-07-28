@@ -78,7 +78,7 @@ webhook:
 
 #### `tokens` line notify 權杖
 
-若要使用 line notify 進行發送，需要提供 line notify 權杖，可至 [Line Notify](https://notify-bot.line.me/zh_TW/) 申請。
+若要使用 line notify 進行發送，需要提供 line notify 權杖，可至 [Line Notify](https://notify-bot.line.me/) 申請。
 
 ### `area_name` 地區名稱
 
