@@ -88,38 +88,38 @@ func GetClosedSchool() (*WorkSchoolCloseMap, error) {
 
 /* ----- notify ----- */
 func NotifyLine(values WorkSchoolClose) {
-	TOKEN := ConfigData.Line.TOKEN
+	for _, TOKEN := range ConfigData.Line.Tokens {
+		if TOKEN == "" {
+			log.Println("Line token is empty")
+			continue
+		}
 
-	if TOKEN == "" {
-		log.Println("Line token is empty")
-		return
-	}
+		text := "\n"
+		for _, v := range values.Data {
+			text += fmt.Sprintf("%s: %s\n", v.County, strings.ReplaceAll(v.State, "\n", "\n  "))
+		}
+		data := url.Values{"message": {text}}.Encode()
+		req, _ := http.NewRequest("POST", LineMessageAPIUrl, strings.NewReader(data))
 
-	text := "\n"
-	for _, v := range values.Data {
-		text += fmt.Sprintf("%s: %s\n", v.County, strings.ReplaceAll(v.State, "\n", "\n  "))
-	}
-	data := url.Values{"message": {text}}.Encode()
-	req, _ := http.NewRequest("POST", LineMessageAPIUrl, strings.NewReader(data))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Set("Content-Length", strconv.Itoa(len(data)))
+		req.Header.Set("Authorization", "Bearer "+TOKEN)
+		req.Header.Set("User-Agent", UA)
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Content-Length", strconv.Itoa(len(data)))
-	req.Header.Set("Authorization", "Bearer "+TOKEN)
-	req.Header.Set("User-Agent", UA)
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Printf("Error send Line notification: %s\n", err)
+			return
+		}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Printf("Error send Line notification: %s\n", err)
-		return
-	}
+		defer resp.Body.Close()
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		data, _ := io.ReadAll(resp.Body)
-		log.Printf("Error send Line notification: %s\nResponse: %s\nSend: ", err, data)
-		data, _ = io.ReadAll(resp.Request.Body)
-		log.Println(string(data))
+		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+			data, _ := io.ReadAll(resp.Body)
+			log.Printf("Error send Line notification: %s\nResponse: %s\nSend: ", err, data)
+			data, _ = io.ReadAll(resp.Request.Body)
+			log.Println(string(data))
+		}
 	}
 }
 

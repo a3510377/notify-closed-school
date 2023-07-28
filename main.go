@@ -63,10 +63,10 @@ func checkAndNotification() error {
 
 func notification(notifications WorkSchoolClose) {
 	if ConfigData.Discord.Enable {
-		NotifyDiscord(notifications)
+		go NotifyDiscord(notifications)
 	}
 
 	if ConfigData.Line.Enable {
-		NotifyLine(notifications)
+		go NotifyLine(notifications)
 	}
 }
