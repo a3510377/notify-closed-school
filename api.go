@@ -59,7 +59,10 @@ func GetClosedSchool() (*WorkSchoolCloseMap, error) {
 	c.OnHTML("#Table>.Table_Body>tr:not(:last-child)", func(e *colly.HTMLElement) {
 		values := e.ChildTexts("td")
 
-		if len(values) > 2 {
+		// 無停班停課訊息。
+		if lenValues := len(values); lenValues == 1 {
+			return
+		} else if lenValues > 2 {
 			values = values[1:3]
 		}
 
