@@ -46,12 +46,16 @@ func checkAndNotification() error {
 
 	tmpData := GetTmpDate()
 	for k, v := range data.Data {
+		log.Println("---------------")
+		log.Println(k, v)
 		if !areaNamesMap[k] || tmpData[k] == v.State {
+			log.Println("skip")
 			continue
 		}
 		notifications = append(notifications, v)
 		tmpData[k] = v.State
 	}
+	log.Println("---------------")
 
 	if len(notifications) > 0 {
 		notification(WorkSchoolClose{Date: data.Date, Data: notifications})
