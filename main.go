@@ -28,6 +28,7 @@ func main() {
 
 	c.AddFunc(specTime, main)
 
+	main()  // first run
 	c.Run() // loop start
 }
 
