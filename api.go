@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	noClose   = []string{"尚未列入警戒區。", "今天照常上班、照常上課。"}
+	noClose   = []string{"尚未列入警戒區。", "今天照常上班、照常上課。", "明天照常上班、照常上課。"}
 	timeMatch = regexp.MustCompile(`\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}`)
 )
 
