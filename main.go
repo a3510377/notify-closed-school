@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -57,28 +58,47 @@ func checkAndNotification() error {
 
 	tmpData := GetTmpDate()
 	for county, v := range data.Data {
-		if !areaNamesMap[county] {
-			continue
-		}
-
 		countyTmpData, countyExists := tmpData[county]
 		if !countyExists {
 			tmpData[county] = map[string]bool{}
 		}
 
+		details := []string{}
 		for _, detail := range v.Details {
 			absoluteDetail := ConvertRelativeToAbsoluteTime(detail, *data.Date)
 			if _, ok := countyTmpData[absoluteDetail]; ok {
 				continue
 			}
 
-			notifications = append(notifications, v)
+			details = append(details, detail)
 			tmpData[county][absoluteDetail] = true
 		}
+
+		notifications = append(notifications, WorkSchoolCloseData{
+			County:  county,
+			Details: details,
+		})
 	}
 
 	if len(notifications) > 0 {
-		notification(WorkSchoolClose{Date: data.Date, Data: notifications})
+		text := ""
+		for _, v := range notifications {
+			text += fmt.Sprintf("%s: \n  %s\n", v.County, strings.Join(v.Details, "\n  "))
+		}
+		fmt.Println(text)
+
+		sendNotifications := []WorkSchoolCloseData{}
+		for _, data := range notifications {
+			if !areaNamesMap[data.County] {
+				continue
+			}
+
+			sendNotifications = append(sendNotifications, data)
+		}
+
+		if len(sendNotifications) > 0 {
+			notification(WorkSchoolClose{Date: data.Date, Data: sendNotifications})
+		}
 	}
 
 	// clear timeout data
