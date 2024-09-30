@@ -24,8 +24,10 @@ const (
 )
 
 var (
-	noClose   = []string{"尚未列入警戒區。", "今天照常上班、照常上課。", "明天照常上班、照常上課。"}
-	timeMatch = regexp.MustCompile(`\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}`)
+	noClose               = []string{"尚未列入警戒區", "今天照常上班、照常上課", "明天照常上班、照常上課"}
+	noClassMap            = map[string]void{}
+	timeMatch             = regexp.MustCompile(`\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}`)
+	countyCityPrefixRegex = regexp.MustCompile("^.{2}[縣市]")
 )
 
 // const WorkSchoolCloseURL = "https://alerts.ncdr.nat.gov.tw/RssAtomFeed.ashx?AlertType=33"
@@ -40,8 +42,14 @@ type WorkSchoolCloseMap struct {
 	Data map[string]WorkSchoolCloseData
 }
 type WorkSchoolCloseData struct {
-	County string
-	State  string
+	County  string
+	Details []string
+}
+
+func init() {
+	for _, v := range noClose {
+		noClassMap[v] = void{}
+	}
 }
 
 func GetClosedSchool() (*WorkSchoolCloseMap, error) {
@@ -68,16 +76,22 @@ func GetClosedSchool() (*WorkSchoolCloseMap, error) {
 
 		county, state := strings.TrimSpace(values[0]), strings.TrimSpace(values[1])
 
-		for _, v := range noClose {
-			if state == v {
+		details := []string{}
+		for _, v := range regexp.MustCompile("。|\n").Split(state, -1) {
+			v = strings.TrimSpace(v)
+			if v == "" {
+				continue
+			}
+			if _, ok := noClassMap[v]; ok {
 				return
 			}
-			state = strings.TrimLeft(state, v)
+
+			details = append(details, countyCityPrefixRegex.ReplaceAllString(v, ""))
 		}
 
 		result.Data[county] = WorkSchoolCloseData{
-			County: county,
-			State:  strings.ReplaceAll(strings.TrimSpace(state), "  ", "\n"),
+			County:  county,
+			Details: details,
 		}
 	})
 
@@ -99,7 +113,7 @@ func NotifyLine(values WorkSchoolClose) {
 
 		text := "\n"
 		for _, v := range values.Data {
-			text += fmt.Sprintf("%s: %s\n", v.County, strings.ReplaceAll(v.State, "\n", "\n  "))
+			text += fmt.Sprintf("%s: \n  %s\n", v.County, strings.Join(v.Details, "\n  "))
 		}
 		data := url.Values{"message": {text}}.Encode()
 		req, _ := http.NewRequest("POST", LineMessageAPIUrl, strings.NewReader(data))
@@ -134,7 +148,7 @@ func NotifyDiscord(values WorkSchoolClose) {
 	for _, v := range values.Data {
 		fields = append(fields, map[string]any{
 			"name":   v.County,
-			"value":  v.State,
+			"value":  strings.Join(v.Details, "\n"),
 			"inline": true,
 		})
 	}

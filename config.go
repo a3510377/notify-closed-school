@@ -77,8 +77,8 @@ func init() {
 		}
 		config := NewConfig()
 		data, _ := yaml.Marshal(config)
-		os.MkdirAll(path.Dir(ConfigFilePath), 0o644)
-		os.WriteFile(ConfigFilePath, data, 0o644)
+		os.MkdirAll(path.Dir(ConfigFilePath), 0777)
+		os.WriteFile(ConfigFilePath, data, 0777)
 	} else {
 		yaml.Unmarshal(yamlFile, &ConfigData)
 	}
@@ -89,12 +89,14 @@ func init() {
 			err := watchFile(ConfigFilePath)
 			if err != nil {
 				log.Println("config watch error", err)
+				time.Sleep(time.Second * 5)
 			}
 
 			// reload config
 			yamlFile, err := os.ReadFile(ConfigFilePath)
 			if err != nil {
 				log.Println("config watch error", err)
+				time.Sleep(time.Second * 5)
 			} else {
 				yaml.Unmarshal(yamlFile, &ConfigData)
 			}
@@ -133,19 +135,19 @@ func watchFile(filePath string) error {
 	return nil
 }
 
-func GetTmpDate() (value map[string]string) {
+func GetTmpDate() (value map[string]map[string]bool) {
 	if data, err := os.ReadFile(TmpFilePath); err == nil {
 		json.Unmarshal(data, &value)
 		return
 	}
-	return map[string]string{} // if file not exist
+	return map[string]map[string]bool{} // if file not exist
 }
 
 func WriteTmpDate(v any) (err error) {
 	bytes, err := json.Marshal(v)
 	if err == nil {
-		os.MkdirAll(path.Dir(ConfigFilePath), 0o644)
-		os.WriteFile(TmpFilePath, bytes, 0o644)
+		os.MkdirAll(path.Dir(ConfigFilePath), 0777)
+		os.WriteFile(TmpFilePath, bytes, 0777)
 	}
 	return
 }

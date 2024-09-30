@@ -2,33 +2,43 @@ package main
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"github.com/robfig/cron/v3"
 )
 
 func main() {
-	main := func() {
+	const specTime = "*/15 * * * *"
+	// everyMinute, _ := cron.ParseStandard("* * * * *")
+
+	c := cron.New(cron.WithLogger(cron.VerbosePrintfLogger(log.Default())))
+
+	loop, _ := c.AddFunc(specTime, func() {
 		retryCount := 0
 		for ; retryCount < 3; retryCount++ {
+			log.Println("Check and notification")
 			if err := checkAndNotification(); err != nil {
+				log.Println("checkAndNotification error", err)
 				time.Sleep(time.Second * 5) // retry after 5 seconds
 				continue
 			}
+
+			log.Println(strings.Repeat("-", 70))
 			break
 		}
 		if retryCount >= 3 {
 			log.Println("Retry 3 times, skip check")
 		}
-	}
+	})
+	entry := c.Entry(loop)
 
-	const specTime = "*/15 * * * *"
+	go entry.Job.Run() // first run
 
-	c := cron.New(cron.WithLogger(cron.VerbosePrintfLogger(log.Default())))
+	// oldSchedule := entry.Schedule
+	// entry.Schedule = everyMinute
+	// entry.Next = time.Now().In(c.Location())
 
-	c.AddFunc(specTime, main)
-
-	main()  // first run
 	c.Run() // loop start
 }
 
@@ -46,20 +56,39 @@ func checkAndNotification() error {
 	}
 
 	tmpData := GetTmpDate()
-	for k, v := range data.Data {
-		log.Println("---------------")
-		log.Println(k, v)
-		if !areaNamesMap[k] || tmpData[k] == v.State {
-			log.Println("skip")
+	for county, v := range data.Data {
+		if !areaNamesMap[county] {
 			continue
 		}
-		notifications = append(notifications, v)
-		tmpData[k] = v.State
+
+		countyTmpData, countyExists := tmpData[county]
+		if !countyExists {
+			tmpData[county] = map[string]bool{}
+		}
+
+		for _, detail := range v.Details {
+			absoluteDetail := ConvertRelativeToAbsoluteTime(detail, *data.Date)
+			if _, ok := countyTmpData[absoluteDetail]; ok {
+				continue
+			}
+
+			notifications = append(notifications, v)
+			tmpData[county][absoluteDetail] = true
+		}
 	}
-	log.Println("---------------")
 
 	if len(notifications) > 0 {
 		notification(WorkSchoolClose{Date: data.Date, Data: notifications})
+	}
+
+	// clear timeout data
+	nowTime := time.Now()
+	for _, data := range tmpData {
+		for k := range data {
+			if HasStatusIsOld(k, nowTime) {
+				delete(data, k)
+			}
+		}
 	}
 
 	WriteTmpDate(tmpData)
