@@ -61,7 +61,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx
           restore-keys: ${{ runner.os }}-buildx-
 
       - uses: docker/build-push-action@v4
