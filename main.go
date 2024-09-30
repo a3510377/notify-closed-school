@@ -82,17 +82,19 @@ func checkAndNotification() error {
 
 	if len(notifications) > 0 {
 		text := ""
-		for _, v := range notifications {
-			text += fmt.Sprintf("%s: \n  %s\n", v.County, strings.Join(v.Details, "\n  "))
-		}
-
 		sendNotifications := []WorkSchoolCloseData{}
-		for _, data := range notifications {
-			if !areaNamesMap[data.County] || len(data.Details) == 0 {
+		for _, v := range notifications {
+			if len(v.Details) == 0 {
 				continue
 			}
 
-			sendNotifications = append(sendNotifications, data)
+			text += fmt.Sprintf("%s: \n  %s\n", v.County, strings.Join(v.Details, "\n  "))
+
+			if !areaNamesMap[v.County] {
+				continue
+			}
+
+			sendNotifications = append(sendNotifications, v)
 		}
 
 		if len(sendNotifications) > 0 {
