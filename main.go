@@ -97,8 +97,11 @@ func checkAndNotification() error {
 			sendNotifications = append(sendNotifications, v)
 		}
 
-		if len(sendNotifications) > 0 {
+		if text != "" {
 			fmt.Println(text)
+		}
+
+		if len(sendNotifications) > 0 {
 			notification(WorkSchoolClose{Date: data.Date, Data: sendNotifications})
 		}
 	}
