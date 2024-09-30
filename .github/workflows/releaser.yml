@@ -2,7 +2,7 @@ name: releaser
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [master]
     paths-ignore:
       - README.md
       - .github/**
