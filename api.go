@@ -82,7 +82,7 @@ func GetClosedSchool() (*WorkSchoolCloseMap, error) {
 			if v == "" {
 				continue
 			}
-			if _, ok := noClassMap[v]; ok {
+			if _, ok := noClassMap[v]; !ok {
 				return
 			}
 
