@@ -82,8 +82,8 @@ func GetClosedSchool() (*WorkSchoolCloseMap, error) {
 			if v == "" {
 				continue
 			}
-			if _, ok := noClassMap[v]; !ok {
-				return
+			if _, ok := noClassMap[v]; ok {
+				continue
 			}
 
 			details = append(details, countyCityPrefixRegex.ReplaceAllString(v, ""))
